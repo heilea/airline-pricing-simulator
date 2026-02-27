@@ -1,0 +1,4 @@
+[ Types ] → décrivent la structure tarifaire
+[ Lib ] → applique la logique RM
+[ Components ] → affichent les décisions
+[ App ] → assemble le tout
