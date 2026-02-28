@@ -1,0 +1,87 @@
+body {
+  background-image: url("../public/bg-tatoo-2.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  height: 100vh;
+  margin: 0;
+}
+
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+.card {
+  width: 420px;
+  padding: 2rem;
+  background: rgb(173, 31, 31);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.06);
+}
+
+.title {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.button {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+
+  color: black;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: #eceff3;
+}
+
+.active {
+  background: #b32424;
+  color: white;
+  border: 1px solid #111827;
+}
+
+.runButton {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.runButton:hover {
+  background: #1e40af;
+}
+
+.results {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.results p {
+  margin: 0.4rem 0;
+}
