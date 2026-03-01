@@ -1,91 +1,69 @@
 import { FareClass } from "@/types/pricing";
 
-const TOTAL_SEATS = 68; // Capacité totale de l'avion
+const TOTAL_SEATS = 72;
 
-// Type pour gérer la saisonnalité
 type Season = "HIGH" | "LOW";
 
-/**
- * Retourne un multiplicateur selon la saison.
- * HIGH = demande plus forte
- * LOW  = demande plus faible
- */
 function getSeasonMultiplier(season: Season): number {
-  return season === "HIGH" ? 1.2 : 0.8;
+  return season === "HIGH" ? 1.3 : 0.7;
 }
 
-/**
- * Estime la demande pour une classe tarifaire donnée.
- *
- * Logique :
- * - Plus le prix augmente → la demande diminue
- * - Puis on ajuste selon la saison
- */
 function estimateDemand(price: number, seasonMultiplier: number): number {
-  // Relation simple prix / demande
-  // Exemple : si prix = 1000 → 20 - 10 = 10 passagers
-  const baseDemand = 20 - price / 100;
-
-  // Ajustement selon la saison (HIGH ou LOW)
+  const baseDemand = 50 - price / 1000;
   const adjustedDemand = baseDemand * seasonMultiplier;
-
-  // On empêche la demande d’être négative
-  // On arrondit à l’entier inférieur (pas de demi-passager)
   return Math.max(0, Math.floor(adjustedDemand));
 }
 
-/**
- * Fonction principale de simulation
- *
- * Elle calcule :
- * - Combien de sièges sont vendus
- * - Le revenue total
- * - Le load factor
- */
 export function simulateDemand(fareClasses: FareClass[], season: Season) {
-  let totalSold = 0; // Total sièges vendus
-  let totalRevenue = 0; // Revenue total généré
+  let totalSold = 0;
+  let totalRevenue = 0;
 
-  // Récupération du multiplicateur saison
-  const multiplier = getSeasonMultiplier(season);
+  // Ordre de traitement : du plus cher au moins cher
+  const highToLow = [...fareClasses].sort((a, b) => b.price - a.price);
 
-  const updatedFares = fareClasses.map((fare) => {
-    // Si la classe est fermée → on ne vend rien
+  // Protégés des classes supérieures
+  let totalProtectedHigher = 0;
+
+  const processedFares = highToLow.map((fare) => {
     if (!fare.open) {
-      return fare;
+      return {
+        ...fare,
+        seatsSold: 0,
+        demand: 0,
+      };
     }
 
-    // 1️⃣ Estimation de la demande pour cette classe
-    const demand = estimateDemand(fare.price, multiplier);
+    const demand = estimateDemand(fare.price, getSeasonMultiplier(season));
 
-    // 2️⃣ Calcul des sièges disponibles
-    // On enlève :
-    // - les sièges déjà vendus
-    // - les sièges protégés pour classes supérieures
-    const seatsAvailable = TOTAL_SEATS - totalSold - fare.seatsProtected;
+    // Calcul des sièges disponibles
+    const availableSeats = TOTAL_SEATS - totalSold - totalProtectedHigher;
 
-    // 3️⃣ Nombre réel de sièges vendus
-    // On ne peut pas vendre plus que :
-    // - la demande estimée
-    // - les sièges disponibles
-    const seatsToSell = Math.min(demand, seatsAvailable);
+    // Protection anti-négatif
+    const seatsToSell = Math.max(0, Math.min(demand, availableSeats));
 
-    // 4️⃣ Mise à jour des totaux globaux
     totalSold += seatsToSell;
     totalRevenue += seatsToSell * fare.price;
 
-    // 5️⃣ Retour de la classe mise à jour
+    // Ajout des protégés de cette classe
+    totalProtectedHigher += fare.seatsProtected;
+
     return {
       ...fare,
       seatsSold: seatsToSell,
+      demand: demand, // 👈 ON GARDE LA DEMANDE
     };
   });
 
+  // Tri pour l'affichage : du moins cher au plus cher
+  const lowToHigh = processedFares.sort((a, b) => a.price - b.price);
+
   return {
-    updatedFares,
+    updatedFares: lowToHigh,
     totalSold,
     totalRevenue,
-    // Load factor = taux de remplissage
     loadFactor: totalSold / TOTAL_SEATS,
+    availableSeats: TOTAL_SEATS - totalSold,
   };
 }
+
+export { TOTAL_SEATS };
